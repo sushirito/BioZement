@@ -1,0 +1,12 @@
+# The geometry-file is given by the first (non-empty) uncommented line below
+biozement2dwithrim.dat
+#biozement2d.dat
+#short_tube.dat
+#geo_3D_tube.dat
+#triangle_150_44_50.dat
+#cube_center_wall_40_40_41.dat
+#cube_40_40_40.dat
+#channel_60_10_10.dat
+#channel_80_20_20.dat
+SK1--shift_0_0_0--size_43x36x29__20x-upscale.dat
+#Porer-70kv2.modif--shift_0_0_0--size_100x100x100.dat

@@ -1,0 +1,43 @@
+set real_units 0
+# ----------------------------
+<mpi>
+    num_proc 2 1 1
+<end>
+<dim>
+    nD 3              # use 2 for 2D simulations
+    nQ 19             # use 9 for 2D simulations, 15 or 19 for 3D simulations
+<end>
+# ----------------------------
+<iterations>
+    max   500000000     # when to stop the simulation (steps)
+    write 10000       # write interval in steps (real_unit==1 : seconds)
+<end>
+# ----------------------------
+<fluid>
+    Ca		1e-5      # capillary number	
+    const_flow  1         # 1: constant flow, 2: constant pressure
+    force_x     2e-5        # force driving the flow field [LB units]
+    max_vel     1e-4         # maximum velocity [LB units]
+    mean_vel    5e-6         # mean fluid velocity [m/s]
+    q_source    0         # value of flux-source [LB units] 
+    u_Darcy     0         # velocity in source-term of collision-op. 1 PV/day : 7 cm/day = 8.1e-7 m/s
+    grad_P	0         # imposed pressure gradient per voxel
+    beta        1.0       # Latva-Kokko: surface thickness parameter
+    <phases>        
+        num 2            # number of fluid phases
+	tau 1.0 1.0      # LB value that affects the viscosity
+ 	#tau 1.3 0.66     # LB value that affects the viscosity
+    <end>
+    <rho>
+	init  0.5 0.5    # sum should equal 1
+	inlet 1.0 1.0    # 
+	wall  1.0 0.0     # sum should equal 1
+    <end>
+    <surface_tension>
+	0 0.06 
+	0 0
+    <end>
+    P_in_color_grad  1.005  # inlet pressure for color-grad 
+<end>
+
+

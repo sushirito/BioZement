@@ -1,0 +1,112 @@
+#!/usr/bin/env bash
+
+geo_name="geo.list"
+bin_name="lb_ejah"
+
+clean_out=1
+overwrite_out=0     # 0: the out-folder is incremented for new runs, 1: out-folder overwritten 
+
+### check arguments
+if [[ $# -lt 1 ]]; then
+    echo 
+    echo "  Case-folder missing!"
+    echo ""
+    echo "  Usage: "
+    echo "       run_case <case-folder> [-geo geo-file]"
+    echo
+    echo "       case-folder : mandatory name of a folder with files: '$inp_name', '$opt_name', and '$geo_name'"
+    echo "              -geo : optional name of a geo-file that overrides geo-files in <case-folder>/$geo_name"
+    echo
+    exit 1
+fi
+###
+if [[ $2 ]] && ! { [[ $2 = "-geo" ]] || [[ $2 = "-debug" ]] || [[ $2 = "-valgrind" ]] || [[ $2 = "-species" ]]; }; then
+    echo 
+    echo "  The second argument must be '-geo', '-debug', '-valgrind', or '-species', not '$2'"
+    echo 
+    exit 1
+fi
+###
+GDB=""
+if [[ $2 = "-debug" ]]; then
+    GDB="gdb -ex run --args"
+fi
+
+VAL=""
+if [[ $2 = "-valgrind" ]]; then
+    VAL="valgrind"
+fi
+
+SPECIES_IN=""
+if [[ $2 = "-species" ]]; then
+    SPECIES_IN="-species_rho_in $3"
+fi
+
+### program folder
+PROG_DIR="program_files"
+
+### hash-table coupling simulation case with the correct binary version
+declare -A case_bin=( ["calculate_perm__force"]="flow"
+		      ["calculate_perm__grad_P"]="grad_P"
+		      ["get_percolating_cluster"]="perc_cluster"
+		      ["two-phase"]="two-phase" 
+		      ["bulk_source_chem"]="bulk_source"
+		      ["biozement"]="biozement"
+		      ["calcite_magnesite_replacement"]="calc_magn_replace" )
+
+echo "${case_bin[biozement]}"
+
+### set variables from arguments
+CASE_DIR="$1"
+BIN_PATH="$PROG_DIR/bin/${case_bin[${CASE_DIR}]}/$bin_name"
+INP="$CASE_DIR/input.dat"
+
+### read geo-file from geo.list in case folder (first non-empty uncommented line)
+GEO_FILE="$PROG_DIR/geo/$(egrep -v '^ *#|^ *$' ${CASE_DIR}/${geo_name} | head -1)"
+### file given by -geo argument overrides default file
+if [[ "$2" = "-geo" ]]; then
+    GEO_FILE=$3
+fi
+if [[ -z "${GEO_FILE// }" ]]; then
+    echo ""
+    echo "  ERROR! Geometry file not specified in ${CASE_DIR}/${geo_name} or by the -geo argument"
+    echo ""
+    exit 1    
+fi
+###
+if [[ ! -f ${GEO_FILE} ]]; then
+    echo 
+    echo "  The given geometry file ${GEO_FILE} is not found!"
+    echo 
+    exit 1
+fi
+
+### read mpi vector value from input.dat
+NP=$(grep -hre 'num_proc' "$INP" | awk '{print $2*$3*$4}')
+
+### check if out folder exists, and increment if true
+OUT="out"
+if [[ $overwrite_out -eq 0 ]]; then
+    c=1
+    while [[ -d "$CASE_DIR/$OUT" ]]; do
+	OUT="out-$((c++))"
+    done
+else
+    if [[ $clean_out -eq 1 ]]; then
+	rm -r "$CASE_DIR/$OUT/*"
+    fi
+fi
+
+    ### currently need this if running on a mac
+MCA=""
+if [[ $OSTYPE == *"darwin"* ]]; then
+    MCA="--mca io romio314"
+fi
+	
+### start simulation
+CMD="mpirun ${MCA} -n ${NP} ${GDB} ${VAL} ${BIN_PATH} -path ${CASE_DIR} -geo ${GEO_FILE} -out ${OUT} ${SPECIES_IN}"
+echo $CMD
+eval $CMD
+#mpirun ${MCA} -n ${NP} ${GDB} ${VAL} ${BIN_PATH} -path ${CASE_DIR} -geo ${GEO_FILE} -out ${OUT} ${RHO_IN}
+
+

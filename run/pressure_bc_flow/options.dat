@@ -1,0 +1,58 @@
+# ----------------------------
+<switch>
+    chem		    0  # switch chemistry on (1) or off (0)
+    find_steady_state       0  # 1: 1 specie initialized to 1, 2: all species initialized before chem turned on
+    kick_start              0  # 1: inlet conc in all fluid nodes (DIFFUSION run) 2:inlet ,3:init conc for all fluid nodes
+    skip_init_velocity_run  0  # 0: init velocity to steady-state before main loop, 1: velocity is zero
+    write_velocity          1  # 1: output fluid data to file
+    read_vel_from_file      0  # read velocity from file
+    read_species_from_file  0  # read species from file
+    find_isolated_nodes     0  # >0: search for isolated nodes and exit (turns on chem and closed_cell) 
+    boost_rate              0  # 0 is off
+    periodic_mpi	    1  # 1: periodic mpi, 0:non-periodic mpi
+<end>    
+# ----------------------------
+<geometry>
+    flip_x           0     # 1: rotate geometry 180 deg with axis along y-dir (i.e. flood in opposite direction)
+    rotate_y         0     # 1: rotate geometry 45 deg counter-clockwise around y-axis
+    rotate_z         0     # 1: rotate geometry 45 deg clockwise around z-axis
+    wall_nodes       1     # >=1: wall thickness in nodes
+    closed_cell      1     # 0: open inlet/outlet, >0: inlet/outlet closed by this number of nodes
+    copy_in_out      4     # copy this thickness of nodes at inlet and outlet
+    inlet_x          3     # x-node position of inlet  0 1 2 3 4  P-periodic, W-wall, D-discard
+    outlet_x         3     # and outlet nodes         |P|W|D|I|F| I-inlet, F-fluid
+    in_nodes         0     # >=1: length of inlet chamber in nodes
+    out_nodes        0     # >=1: length of outlet chamber in nodes
+    inertx_inlet     0     # >=0: number of inert nodes at inlet
+    inertx_outlet    0     # >=0: number of inert nodes at outlet
+    inert_walls      0     # 1: outer walls inert, 0: outer walls reactive
+#
+#    magn_surface     0     # 1: magnesite-sites only on surface, 0: magnesite-sites in volume
+#    magn_percent     20    # percent of surface/volume where magnesite can precipitate
+#    magn_limit       0.01  # the solid fraction where non-nucleation sites allow precipitation
+<end>
+# ----------------------------
+<output>
+    pH                 1      # choose if pH should be in output
+    eff_offset         4      # x-pos from outlet where flux and effluent is measured (should be inert)
+    effluent_interval  1000   # effluent measurement frequency (timesteps) (neg. values = every step)
+    perm_interval      -1     # <0: off, 0: measure perm and exit, >0: perm measurement frequency (timesteps)
+<end>
+# ----------------------------
+<splaytree>                   # the splaytree stores chemical solutiuons and speeds up the code  
+    on         1              # turn on/off splaytree 
+    length     1e7            # max number of total elements in splaytree
+    resolution 1000           # splaytree resolution
+<end>
+# ----------------------------
+<convergence>                 # different absolute convergence limits
+    length             100    # steps between convergence checks
+    jump               0.05   # fraction of over- or underflow in solid fraction during convergence jumps
+                              # (large values speed up the simulation at the cost of accuracy)
+    crit_vel           1e-6  # velocity convergence limit 
+    crit_vel_target    1e-2   # target velocity convergence limit 
+    crit_chem          1e-6   # species convergence limit
+    crit_ss            1e-8   # initial species convergence limit
+    crit_ss_min        1e-8   # initial minimum species convergence limit
+    steps_until_check  1000   # steps to wait before convergence check (both initial and during run)
+<end>

@@ -1,0 +1,66 @@
+set real_units 1
+# ----------------------------
+<mpi>
+    num_proc 1 1 1
+<end>
+# ----------------------------
+<dim>
+    nD 3              # use 2 for 2D simulations
+    nQ 15             # use 9 for 2D simulations, 15 or 19 for 3D simulations
+<end>
+# ----------------------------
+<iterations>
+    max   2000000      # stop simulation after 
+    write -3600        # write interval in seconds
+<end>
+# ----------------------------
+<chem>
+    temp    130       # temperature in Celcius
+    tau     1.0       # LB value that affects the diffusion constant 
+    D       0.7e-9    # physical diffusion constant [m/s2] 0.7e-9 : CaCo2 in water, 2.3e-9 : self-diffusion water
+    <inlet>           # chemical inlet concentration in mol/L
+        Ca   1.0e-8
+		Mg   0.219
+        Cl   0.438
+        HCO3 1.0e-8
+    <end>
+    <bulk>            # the chemical bulk concentration is calculated by the program
+        Ca   1e-8
+		Mg   1e-8
+        Cl   1e-8
+        HCO3 1e-8
+    <end>
+    <rate>            # rate = (k_1 + a_H k_2)*(1-SI^n)^m
+    ## from Palandri et al. @ 25 C
+	## name    wt%  S  log_af     k_1         k_2     n   m
+	#calcite     1   2    0      1.549e-6    5.012e-1  1   1
+    #magnesite   0   2    0      4.571e-10   4.169e-7  1   1
+    ## from GCA-paper @ 130 C
+	##  name    wt% S  log_af     k_1         k_2     n   m
+        calcite     1  2    0      3.88e-6     1.25e-1   1   1
+        magnesite   0  2    0      2.74e-11       0      1   2
+        #dolomite    0  2    0      2.74e-11       0      1   1
+        #anhydrite   0  2    0      6.457e-4       0      1   1
+    <end>
+<end>
+# ----------------------------
+<fluid>
+    const_flow  1         # 1: constant flow, 2: constant pressure
+    force_x     6.5e-5    # force driving the flow field [LB units]
+    max_vel     1e-3      # maximum velocity [LB units]
+    mean_vel    0         # mean fluid velocity [m/s]
+    q_source    0         # value of flux-source [LB units] 
+    u_Darcy     8.1e-5    # velocity in source-term of collision-op. 1 PV/day : 7 cm/day = 8.1e-7 m/s
+    grad_P      0
+    <phases>        
+        num 1             # number of fluid phases
+		tau 1.0           # LB value that affects the viscosity
+    <end>
+    <rho>
+		init 1.0          # initial fluid density  
+		inlet 1.0
+    <end>
+<end>
+# ----------------------------
+
+
